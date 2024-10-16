@@ -3,19 +3,22 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: 100dvh;
 }
 
 .App {
   font-family: sans-serif;
-  text-align: center;
-  margin: 20px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
 }
 
 .dropzone {
   border: 2px dashed #cccccc;
   padding: 20px;
-  margin-bottom: 20px;
   cursor: pointer;
 }
 
@@ -24,8 +27,8 @@ body {
   overflow-y: scroll;
   padding: 20px;
   border: 1px solid #ccc;
-  margin: 0 0 20px;
   background-color: #f9f9f9;
+  text-align: center;
 }
 
 .subtitle {
@@ -45,10 +48,6 @@ body {
   font-size: 8px;
   color: gray;
   margin: 0 0 8px;
-}
-
-.start-subtitles {
-  margin: 0 0 20px;
 }
 
 .time-adjustment label {
