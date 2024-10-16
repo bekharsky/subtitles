@@ -149,7 +149,7 @@ function App() {
         {/* Time adjustment slider */}
         <div className="time-adjustment">
           <label>
-            Time Adjustment (ms): {timeAdjustment}ms
+            <span>Time adjust, ms:</span>
             <input
               type="range"
               min="-480000"
@@ -157,7 +157,8 @@ function App() {
               step="100"
               value={timeAdjustment}
               onChange={handleTimeAdjustment}
-            />
+            />{' '}
+            <span>{timeAdjustment}ms</span>
           </label>
         </div>
       </>

@@ -42,7 +42,7 @@ body {
 
 .timestamp {
   display: block;
-  font-size: 10px;
+  font-size: 8px;
   color: gray;
   margin: 0 0 8px;
 }
@@ -51,7 +51,13 @@ body {
   margin: 0 0 20px;
 }
 
+.time-adjustment label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
 input[type="range"] {
   width: 300px;
-  margin-left: 10px;
 }
