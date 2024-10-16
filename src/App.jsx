@@ -158,7 +158,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Subtitle Viewer</h1>
+      {!subtitles.length && (<h1>Subtitle Viewer</h1>)}
 
       {/* Dropzone and button */}
       {!subtitles.length && (
