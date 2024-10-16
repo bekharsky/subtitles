@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import dayjs from "dayjs";
 import "./App.css";
 
 function App() {
   const [subtitles, setSubtitles] = useState([]);
-  const [currentSubtitle, setCurrentSubtitle] = useState("");
+  const [currentSubtitleId, setCurrentSubtitleId] = useState(null); // Track the current subtitle ID
   const [timeAdjustment, setTimeAdjustment] = useState(0); // Time adjustment in milliseconds
   const [intervalId, setIntervalId] = useState(null); // Store the interval id for cleanup
+
+  const subtitleContainerRef = useRef(null); // Reference for the subtitle container
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: ".srt",
@@ -22,6 +24,7 @@ function App() {
     },
   });
 
+  // Parse the SRT file
   const parseSrt = (data) => {
     const normalizedData = data.replace(/\r\n/g, "\n").trim();
     const blocks = normalizedData.split(/\n\n+/);
@@ -41,8 +44,9 @@ function App() {
     });
   };
 
+  // Start showing subtitles
   const startSubtitles = () => {
-    const startTime = dayjs();
+    const startTime = dayjs(); // Initialize startTime when button is clicked
 
     let interval = setInterval(() => {
       const elapsed = dayjs().diff(startTime, "millisecond") + timeAdjustment; // Add time adjustment
@@ -54,15 +58,14 @@ function App() {
       });
 
       if (current) {
-        setCurrentSubtitle(current.text);
-      } else {
-        setCurrentSubtitle((prevSubtitle) => prevSubtitle);
+        setCurrentSubtitleId(current.id);
       }
     }, 100);
 
     setIntervalId(interval); // Store interval id for later cleanup
   };
 
+  // Stop subtitles when necessary (e.g., when adjusting)
   const stopSubtitles = () => {
     if (intervalId) {
       clearInterval(intervalId);
@@ -70,6 +73,7 @@ function App() {
     }
   };
 
+  // Convert SRT time format to milliseconds
   const timeToMilliseconds = (timeString) => {
     const [hours, minutes, seconds] = timeString.split(":");
     const [secs, ms] = seconds.split(",");
@@ -81,13 +85,27 @@ function App() {
     );
   };
 
+  // Handle time adjustment
   const handleTimeAdjustment = (e) => {
     const newAdjustment = parseInt(e.target.value, 10);
     setTimeAdjustment(newAdjustment); // Update time adjustment
   };
 
+  // Auto-scroll to the current subtitle when it changes
+  useEffect(() => {
+    if (currentSubtitleId !== null && subtitleContainerRef.current) {
+      const activeElement = document.getElementById(`subtitle-${currentSubtitleId}`);
+      if (activeElement) {
+        activeElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }
+  }, [currentSubtitleId]);
+
   return (
-    <main className="App">
+    <div className="App">
       {subtitles.length === 0 ? <>
         <h1>Subtitle Viewer</h1>
 
@@ -96,13 +114,25 @@ function App() {
           <p>Drag and drop an SRT file here, or click to select one</p>
         </div>
       </> : <>
-        <div className="subtitle-display">
-          <h2>{currentSubtitle}</h2>
+        {/* Subtitle Display */}
+        <div className="subtitle-container" ref={subtitleContainerRef}>
+          {subtitles.map((subtitle) => (
+            <div
+              key={subtitle.id}
+              id={`subtitle-${subtitle.id}`}
+              className={`subtitle ${subtitle.id === currentSubtitleId ? "current" : ""
+                }`}
+            >
+              {subtitle.text}
+            </div>
+          ))}
         </div>
 
         <button
+          type="button"
+          className="start-subtitles"
           onClick={() => {
-            stopSubtitles();
+            stopSubtitles(); // Stop any existing interval before starting again
             startSubtitles();
           }}
           disabled={!subtitles.length}
@@ -110,21 +140,24 @@ function App() {
           Start Subtitles
         </button>
 
+        {/* Time adjustment slider */}
         <div className="time-adjustment">
           <label>
             Time Adjustment (ms): {timeAdjustment}ms
             <input
               type="range"
-              min="-480000"
-              max="480000"
-              step="500"
+              min="-960000"
+              max="960000"
+              step="100"
+              size={200}
               value={timeAdjustment}
               onChange={handleTimeAdjustment}
             />
           </label>
         </div>
-      </>}
-    </main>
+      </>
+      }
+    </div >
   );
 }
 
