@@ -91,6 +91,11 @@ function App() {
     setTimeAdjustment(newAdjustment); // Update time adjustment
   };
 
+  const formatTime = (timeString) => {
+    const [hours, minutes, seconds] = timeString.split(":");
+    return `${hours}:${minutes}:${seconds}`;
+  };
+
   // Auto-scroll to the current subtitle when it changes
   useEffect(() => {
     if (currentSubtitleId !== null && subtitleContainerRef.current) {
@@ -123,6 +128,7 @@ function App() {
               className={`subtitle ${subtitle.id === currentSubtitleId ? "current" : ""
                 }`}
             >
+              <span className="timestamp">{formatTime(subtitle.startTime)}</span>
               {subtitle.text}
             </div>
           ))}

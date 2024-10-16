@@ -40,6 +40,13 @@ body {
   background-color: #e0f7fa;
 }
 
+.timestamp {
+  display: block;
+  font-size: 10px;
+  color: gray;
+  margin: 0 0 8px;
+}
+
 .start-subtitles {
   margin: 0 0 20px;
 }
