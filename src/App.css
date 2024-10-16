@@ -3,7 +3,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100dvh;
+  height: 100svh;
 }
 
 .App {
@@ -20,6 +20,7 @@ body {
   border: 2px dashed #cccccc;
   padding: 20px;
   cursor: pointer;
+  text-align: center;
 }
 
 .subtitle-container {
