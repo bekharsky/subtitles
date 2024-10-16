@@ -156,6 +156,15 @@ function App() {
     return `${hours}:${minutes}:${seconds}`;
   };
 
+  const toggleTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    if (currentTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  };
+
   return (
     <div className="App">
       {!subtitles.length && (<h1>Subtitle Viewer</h1>)}
@@ -190,6 +199,7 @@ function App() {
 
       {subtitles.length > 0 && !startTime && (
         <button
+          className="button"
           onClick={() => {
             stopSubtitles(); // Stop any existing interval before starting again
             startSubtitles(0); // Start from the beginning (from 0 ms)
@@ -199,6 +209,10 @@ function App() {
           Start
         </button>
       )}
+
+      <button className="toggle-theme" onClick={() => toggleTheme()}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 8.69V4h-4.69L12 .69L8.69 4H4v4.69L.69 12L4 15.31V20h4.69L12 23.31L15.31 20H20v-4.69L23.31 12zm-2 5.79V18h-3.52L12 20.48L9.52 18H6v-3.52L3.52 12L6 9.52V6h3.52L12 3.52L14.48 6H18v3.52L20.48 12zM12 6v12c3.31 0 6-2.69 6-6s-2.69-6-6-6" /></svg>
+      </button>
     </div>
   );
 }
