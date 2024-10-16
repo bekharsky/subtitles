@@ -20,7 +20,7 @@ body {
 }
 
 .subtitle-container {
-  max-height: 300px;
+  max-height: 360px;
   overflow-y: scroll;
   padding: 20px;
   border: 1px solid #ccc;

@@ -146,10 +146,9 @@ function App() {
             Time Adjustment (ms): {timeAdjustment}ms
             <input
               type="range"
-              min="-960000"
-              max="960000"
+              min="-480000"
+              max="480000"
               step="100"
-              size={200}
               value={timeAdjustment}
               onChange={handleTimeAdjustment}
             />
