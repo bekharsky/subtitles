@@ -149,7 +149,7 @@ function App() {
         {/* Time adjustment slider */}
         <div className="time-adjustment">
           <label>
-            <span>Time adjust, ms:</span>
+            <span>Adjust, ms:</span>
             <input
               type="range"
               min="-480000"
