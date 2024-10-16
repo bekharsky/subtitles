@@ -145,6 +145,7 @@ function App() {
     };
 
     subtitleContainerRef.current?.addEventListener("scroll", handleAutoScrollEnable);
+
     return () => {
       subtitleContainerRef.current?.removeEventListener("scroll", handleAutoScrollEnable);
     };
