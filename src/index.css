@@ -3,5 +3,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100svh;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+*::after,
+*::before {
+    box-sizing: inherit;
 }

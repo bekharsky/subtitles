@@ -168,20 +168,6 @@ function App() {
         </div>
       )}
 
-      {/* Start button */}
-      {subtitles.length > 0 && !startTime && (
-        <button
-          onClick={() => {
-            stopSubtitles(); // Stop any existing interval before starting again
-            startSubtitles(0); // Start from the beginning (from 0 ms)
-          }}
-          disabled={!subtitles.length}
-        >
-          Start Subtitles
-        </button>
-      )}
-
-      {/* Subtitle Display */}
       {subtitles.length > 0 && (
         <div
           className="subtitle-container"
@@ -200,6 +186,18 @@ function App() {
             </div>
           ))}
         </div>
+      )}
+
+      {subtitles.length > 0 && !startTime && (
+        <button
+          onClick={() => {
+            stopSubtitles(); // Stop any existing interval before starting again
+            startSubtitles(0); // Start from the beginning (from 0 ms)
+          }}
+          disabled={!subtitles.length}
+        >
+          Start
+        </button>
       )}
     </div>
   );
