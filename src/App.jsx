@@ -6,8 +6,9 @@ import "./App.css";
 function App() {
   const [subtitles, setSubtitles] = useState([]);
   const [currentSubtitleId, setCurrentSubtitleId] = useState(null); // Track the current subtitle ID
-  const [timeAdjustment, setTimeAdjustment] = useState(0); // Time adjustment in milliseconds
+  const [startTime, setStartTime] = useState(null); // The time when playback starts
   const [intervalId, setIntervalId] = useState(null); // Store the interval id for cleanup
+  const [autoScroll, setAutoScroll] = useState(true); // Track auto-scrolling
 
   const subtitleContainerRef = useRef(null); // Reference for the subtitle container
 
@@ -19,6 +20,9 @@ function App() {
         const text = reader.result;
         const parsedSubtitles = parseSrt(text);
         setSubtitles(parsedSubtitles);
+        setCurrentSubtitleId(null); // Reset current subtitle
+        setStartTime(null); // Reset start time
+        setAutoScroll(true); // Enable auto-scroll when subtitles are first loaded
       };
       reader.readAsText(acceptedFiles[0]);
     },
@@ -44,12 +48,13 @@ function App() {
     });
   };
 
-  // Start showing subtitles
-  const startSubtitles = () => {
-    const startTime = dayjs(); // Initialize startTime when button is clicked
+  // Start showing subtitles from a specific time (in milliseconds)
+  const startSubtitles = (startFromMs = 0) => {
+    const currentTime = dayjs(); // Initialize start time
+    setStartTime(currentTime); // Store start time
 
     let interval = setInterval(() => {
-      const elapsed = dayjs().diff(startTime, "millisecond") + timeAdjustment; // Add time adjustment
+      const elapsed = dayjs().diff(currentTime, "millisecond") + startFromMs;
 
       const current = subtitles.find((sub) => {
         const subStart = timeToMilliseconds(sub.startTime);
@@ -73,7 +78,7 @@ function App() {
     }
   };
 
-  // Convert SRT time format to milliseconds
+  // Convert SRT time format to milliseconds (hh:mm:ss,SSS -> ms)
   const timeToMilliseconds = (timeString) => {
     const [hours, minutes, seconds] = timeString.split(":");
     const [secs, ms] = seconds.split(",");
@@ -85,20 +90,21 @@ function App() {
     );
   };
 
-  // Handle time adjustment
-  const handleTimeAdjustment = (e) => {
-    const newAdjustment = parseInt(e.target.value, 10);
-    setTimeAdjustment(newAdjustment); // Update time adjustment
-  };
+  // Handle phrase click to adjust the start time
+  const handlePhraseClick = (subtitle) => {
+    stopSubtitles(); // Stop any ongoing interval
 
-  const formatTime = (timeString) => {
-    const [hours, minutes, seconds] = timeString.split(":");
-    return `${hours}:${minutes}:${seconds}`;
+    const subtitleTimeMs = timeToMilliseconds(subtitle.startTime); // Get time of the clicked subtitle in ms
+    setCurrentSubtitleId(subtitle.id); // Set the clicked subtitle as the current one
+
+    setAutoScroll(true); // Re-enable auto-scroll after a phrase is clicked
+    // Start subtitles from the clicked phrase's timestamp
+    startSubtitles(subtitleTimeMs);
   };
 
   // Auto-scroll to the current subtitle when it changes
   useEffect(() => {
-    if (currentSubtitleId !== null && subtitleContainerRef.current) {
+    if (currentSubtitleId !== null && subtitleContainerRef.current && autoScroll) {
       const activeElement = document.getElementById(`subtitle-${currentSubtitleId}`);
       if (activeElement) {
         activeElement.scrollIntoView({
@@ -107,63 +113,95 @@ function App() {
         });
       }
     }
+  }, [currentSubtitleId, autoScroll]);
+
+  // Detect when the user scrolls manually and disable auto-scrolling
+  const handleScroll = () => {
+    if (subtitleContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = subtitleContainerRef.current;
+      const isAtBottom = scrollTop + clientHeight === scrollHeight;
+
+      if (!isAtBottom) {
+        setAutoScroll(false); // Disable auto-scroll when the user scrolls manually
+      }
+    }
+  };
+
+  // Check if an element is in the viewport
+  const isInViewport = (element) => {
+    const rect = element.getBoundingClientRect();
+    return rect.top >= 0 && rect.bottom <= window.innerHeight;
+  };
+
+  // Re-enable auto-scrolling if the active subtitle is scrolled back into view
+  useEffect(() => {
+    const handleAutoScrollEnable = () => {
+      if (currentSubtitleId !== null) {
+        const activeElement = document.getElementById(`subtitle-${currentSubtitleId}`);
+        if (activeElement && isInViewport(activeElement)) {
+          setAutoScroll(true); // Re-enable auto-scroll if the active subtitle is back in view
+        }
+      }
+    };
+
+    subtitleContainerRef.current?.addEventListener("scroll", handleAutoScrollEnable);
+    return () => {
+      subtitleContainerRef.current?.removeEventListener("scroll", handleAutoScrollEnable);
+    };
   }, [currentSubtitleId]);
+
+  // Format the time for displaying
+  const formatTime = (timeString) => {
+    const [hours, minutes, seconds] = timeString.split(":");
+    return `${hours}:${minutes}:${seconds}`;
+  };
 
   return (
     <div className="App">
-      {subtitles.length === 0 ? <>
-        <h1>Subtitle Viewer</h1>
+      <h1>Subtitle Viewer</h1>
 
+      {/* Dropzone and button */}
+      {!subtitles.length && (
         <div {...getRootProps()} className="dropzone">
           <input {...getInputProps()} />
           <p>Drag and drop an SRT file here, or click to select one</p>
         </div>
-      </> : <>
-        {/* Subtitle Display */}
-        <div className="subtitle-container" ref={subtitleContainerRef}>
+      )}
+
+      {/* Start button */}
+      {subtitles.length > 0 && !startTime && (
+        <button
+          onClick={() => {
+            stopSubtitles(); // Stop any existing interval before starting again
+            startSubtitles(0); // Start from the beginning (from 0 ms)
+          }}
+          disabled={!subtitles.length}
+        >
+          Start Subtitles
+        </button>
+      )}
+
+      {/* Subtitle Display */}
+      {subtitles.length > 0 && (
+        <div
+          className="subtitle-container"
+          ref={subtitleContainerRef}
+          onScroll={handleScroll}
+        >
           {subtitles.map((subtitle) => (
             <div
               key={subtitle.id}
               id={`subtitle-${subtitle.id}`}
               className={`subtitle ${subtitle.id === currentSubtitleId ? "current" : ""
                 }`}
+              onClick={() => handlePhraseClick(subtitle)} // Handle phrase click
             >
-              <span className="timestamp">{formatTime(subtitle.startTime)}</span>
-              {subtitle.text}
+              <span className="timestamp">{formatTime(subtitle.startTime)}</span> {subtitle.text}
             </div>
           ))}
         </div>
-
-        <button
-          type="button"
-          className="start-subtitles"
-          onClick={() => {
-            stopSubtitles(); // Stop any existing interval before starting again
-            startSubtitles();
-          }}
-          disabled={!subtitles.length}
-        >
-          Start Subtitles
-        </button>
-
-        {/* Time adjustment slider */}
-        <div className="time-adjustment">
-          <label>
-            <span>Adjust, ms:</span>
-            <input
-              type="range"
-              min="-480000"
-              max="480000"
-              step="100"
-              value={timeAdjustment}
-              onChange={handleTimeAdjustment}
-            />{' '}
-            <span>{timeAdjustment}ms</span>
-          </label>
-        </div>
-      </>
-      }
-    </div >
+      )}
+    </div>
   );
 }
 
