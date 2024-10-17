@@ -8,6 +8,21 @@ Dark theme included.
 
 See it in action: https://bekharsky.github.io/subtitles/
 
+# Run and build
+
+The project is bootstrapped using Vite.js React.js template.
+
+To run in dev mode:
+```
+npm i
+npm run dev
+```
+
+To build:
+```
+npm run build
+```
+
 # Screenshots
 
 ![bekharsky github io_subtitles_](https://github.com/user-attachments/assets/722dc27e-74c8-44e8-9ebc-d038416640c6)
